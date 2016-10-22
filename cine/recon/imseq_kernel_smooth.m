@@ -121,6 +121,9 @@ if isempty( kWidth ),
         kWidth = tPeriod;
     end
 end
+if ( kWidth == 0 ),
+    kWidth = eps*1e2;
+end
 
 % Kernel Sigma   % TODO: improve default kernel sigma value
 if isempty( kSigma ),
@@ -129,6 +132,9 @@ if isempty( kSigma ),
     else
         kSigma = tPeriod / 5;
     end
+end
+if ( kSigma == 0 ),
+    kSigma = eps*1e2;
 end
 
 
