@@ -6,13 +6,6 @@ function save_xt2nii( xt, Param, saveFilePath )
 % jfpva (joshua.vanamerom@kcl.ac.uk)
 
 
-%% Setup
-
-origPath  = path;
-resetPath = onCleanup( @() path( origPath ) );
-addpath( '~/Research/fcmr_cine/aux/nifti/' ),
-
-
 %% Get Acqn Parameters
 
 I = Param.acq.ImageInformation(1,1,2);
