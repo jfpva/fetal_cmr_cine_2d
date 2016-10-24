@@ -1,5 +1,4 @@
-function [ xtRlt, safetyMargin, xfFlt, unmix ] = recon_xtsense( xtAcq, xtSmp, xtTrn, csm, psi, varargin )
-%[ xtRlt, xfRcn, xfBlnXY, xfDff, xfPri, xfTrn, xfMask, psi, safetyMargin, xt2xf, xf2xt, xfFlt, unmix ] = recon_xtsense( xtAcq, xtSmp, xtTrn, csm, psi, varargin )
+function [ xtRlt, safetyMargin, xfFlt, unmix, xfRlt, xfBln, xfAcq, xfTrn, xfMask, psi, csm, mask, dt, alpha ] = recon_xtsense( xtAcq, xtSmp, xtTrn, csm, psi, varargin )
 %RECON_XTSENSE  k-t SENSE dynamic MRI reconstruction from x-t data
 % 
 %   xtRcn = RECON_XTSENSE( xtBln, xtDff, xtPsf, xtTrn, csm, psi )

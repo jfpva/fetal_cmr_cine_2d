@@ -101,7 +101,7 @@ combine_coils = @( x ) unmix( x );
 
 % calculate regularisation map
 
-calc_regmap = @(sm0,smRoi,msk) (1/sm0^2)*(~msk)+(1/(smRoi))^2*(msk);
+calc_regmap = @(sm0,smRoi,msk) (1/sm0^2)*(~msk)+(1/smRoi)^2*(msk);
 
 % x-f prior/support (including baseline)
 
