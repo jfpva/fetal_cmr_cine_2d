@@ -11,16 +11,20 @@ function main_fcmr_cine( fcmrNo, seriesNo )
 
 origPath = path;
 resetPath = onCleanup( @() path( origPath ) );
+
 mfileDir = fileparts( which( mfilename ) );
 dependenciesDir = mfileDir;
 
 addpath( genpath( dependenciesDir ) );
+rmpath( genpath( fullfile( dependenciesDir, '_misc' ) )  )
 
 
 %% Setup
 
 
 idStr = sprintf( 'fcmr%03is%02i', fcmrNo, seriesNo );
+
+% Number of Real-Time Frames to Reconstruct
 
 numFrame = 96;
 
@@ -47,7 +51,7 @@ rltDir  = fullfile( resultsDir, strcat( rltDirName, filesep ) );
 
 % Cine Recon
 
-cineDir = fullfile( resultsDir, sprintf( 'cine_%s', strcat(datestr(now,10),datestr(now,5),datestr(now,7)) ) );
+cineDir = fullfile( resultsDir, 'cine' );  % fullfile( resultsDir, sprintf( 'cine_%s', strcat(datestr(now,10),datestr(now,5),datestr(now,7)) ) );
 
 
 %% Real-Time Recon
@@ -145,7 +149,8 @@ fprintf( '\n\nstart: %s\n\n\n', datestr(now) )
 
 % Recon
 
-[ xtRlt, safetyMargin, xfFlt, unmix ] = recon_xtsense( xtDff, xtSmp, xtTrn, csm, psi, 'xtBln', xtBln, 'safetyMargin', safetyMargin, 'mask', mask, 'alpha', alpha, 'dt', dtRlt, 'makeAdaptiveFilter', true, 'verbose', true );
+
+[ xtRlt, safetyMargin, xfFlt, unmix, xfRlt, xfBln, xfAcq, xfTrn, xfMask, psi, csm, mask, dtRlt, alpha ] = recon_xtsense( xtDff, xtSmp, xtTrn, csm, psi, 'xtBln', xtBln, 'safetyMargin', safetyMargin, 'mask', mask, 'alpha', alpha, 'dt', dtRlt, 'makeAdaptiveFilter', true, 'verbose', true );
 
 % Save figures
 save_figs( rltDir )
@@ -153,7 +158,7 @@ close all,
 
 % Save .mat
 
-save( fullfile( rltDir, 'xtsense_recon' ), 'xtRlt', 'safetyMargin', 'alpha', 'xfFlt', 'mask', 'pixdimAcq', 'dtRlt', 'unmix', '-v7.3' )
+save( fullfile( rltDir, 'xtsense_recon' ), 'xtRlt', 'safetyMargin', 'alpha', 'xfFlt', 'xfTrn', 'mask', 'csm', 'unmix', 'psi', 'pixdimAcq', 'dtRlt', '-v7.3' )
 
 % Save .nii
 
@@ -161,7 +166,9 @@ save( fullfile( rltDir, 'xtsense_recon' ), 'xtRlt', 'safetyMargin', 'alpha', 'xf
 % instead of Param and remove reading of Param from .mat file to reduce
 % processing time
 save_xt2nii( xtRlt, Param, fullfile( rltDir, 'realtime.nii.gz' ) );
+delete( fullfile( rltDir, 'realtime.nii.gz' ) );
 save_xt2nii( sum(bsxfun(@times,unmix,xtTrn),4), Param, fullfile( rltDir, 'training.nii.gz' ) );
+delete( fullfile( rltDir, 'training.nii.gz' ) );
 save_xt2nii( mask, Param, fullfile( rltDir, 'mask_fetalheart.nii.gz' ) );
 delete( fullfile( rltDir, 'mask_fetalheart_xyt.nii.gz' ) );
 
