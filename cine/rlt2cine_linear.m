@@ -431,8 +431,8 @@ end
 % Entropy
 
 bwCrop = mask; row = find(sum(bwCrop,2)>0); col = find(sum(bwCrop,1)>0);
-E0.time  = imagemetric( P0.P.imCine(row,col,:), {'PC'} );
-E0.image = imagemetric( P0.P.imCine(row,col,:), {'Cine'} );
+% E0.time  = imagemetric( P0.P.imCine(row,col,:), {'PC'} );
+% E0.image = imagemetric( P0.P.imCine(row,col,:), {'Cine'} );
 
 
 %% Iterative Processing   
@@ -513,8 +513,8 @@ end
 
 % Measure Entropy
 
-E(iIter).R.time  = imagemetric( P(iIter).R.imCine(row,col,:), {'PC'} );
-E(iIter).R.image = imagemetric( P(iIter).R.imCine(row,col,:), {'Cine'} );
+% E(iIter).R.time  = imagemetric( P(iIter).R.imCine(row,col,:), {'PC'} );
+% E(iIter).R.image = imagemetric( P(iIter).R.imCine(row,col,:), {'Cine'} );
 
 
 % Save Results
@@ -555,8 +555,8 @@ else
     % Recon Cine, Measure Entropy
 
     [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-    E(iIter).R.time  = imagemetric( P(iIter).R.imCine(row,col,:), {'PC'} );
-    E(iIter).R.image = imagemetric( P(iIter).R.imCine(row,col,:), {'Cine'} );
+    % E(iIter).R.time  = imagemetric( P(iIter).R.imCine(row,col,:), {'PC'} );
+    % E(iIter).R.image = imagemetric( P(iIter).R.imCine(row,col,:), {'Cine'} );
     
 
 end  % if ( doCardsync ),
@@ -585,8 +585,8 @@ imRltT = transform_imseq( imRlt, P(iIter).T.tform, maskMoco, pixdimAcq );
 % Recon Cine, Measure Entropy
 
 P(iIter).T.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-E(iIter).T.time  = imagemetric( P(iIter).T.imCine(row,col,:), {'PC'} );
-E(iIter).T.image = imagemetric( P(iIter).T.imCine(row,col,:), {'Cine'} );
+% E(iIter).T.time  = imagemetric( P(iIter).T.imCine(row,col,:), {'PC'} );
+% E(iIter).T.image = imagemetric( P(iIter).T.imCine(row,col,:), {'Cine'} );
 
 
 % Save Results
@@ -622,8 +622,8 @@ else  % if ( doMoco ),
     % Recon Cine, Measure Entropy
     
     P(iIter).T.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-    E(iIter).T.time  = imagemetric( P(iIter).T.imCine(row,col,:), {'PC'} );
-    E(iIter).T.image = imagemetric( P(iIter).T.imCine(row,col,:), {'Cine'} );
+    % E(iIter).T.time  = imagemetric( P(iIter).T.imCine(row,col,:), {'PC'} );
+    % E(iIter).T.image = imagemetric( P(iIter).T.imCine(row,col,:), {'Cine'} );
 
     
 end  % if ( doMoco ),
@@ -645,8 +645,8 @@ fprintf( '-----------------------\n\n' )
 % Recon Cine, Measure Entropy
 
 P(iIter).P.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-E(iIter).P.time  = imagemetric( P(iIter).P.imCine(row,col,:), {'PC'} );
-E(iIter).P.image = imagemetric( P(iIter).P.imCine(row,col,:), {'Cine'} );
+% E(iIter).P.time  = imagemetric( P(iIter).P.imCine(row,col,:), {'PC'} );
+% E(iIter).P.image = imagemetric( P(iIter).P.imCine(row,col,:), {'Cine'} );
 
 
 % Save Results
@@ -681,8 +681,8 @@ else  % if ( doOutrej ),
     % Recon Cine, Measure Entropy
 
     P(iIter).P.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-    E(iIter).P.time  = imagemetric( P(iIter).P.imCine(row,col,:), {'PC'} );
-    E(iIter).P.image = imagemetric( P(iIter).P.imCine(row,col,:), {'Cine'} );
+    % E(iIter).P.time  = imagemetric( P(iIter).P.imCine(row,col,:), {'PC'} );
+    % E(iIter).P.image = imagemetric( P(iIter).P.imCine(row,col,:), {'Cine'} );
 
 
 end  % if ( doOutrej ),
@@ -836,6 +836,8 @@ end
 %% Summarise Entropy
 
 
+%{
+
 if ( isVerbose ),
     
     entropyTimeVsR = E0.time;
@@ -914,6 +916,8 @@ if ( isVerbose ),
     
 end
 
+%}
+
 
 %% Save Final Results
 
@@ -924,7 +928,7 @@ if ( isSaveResults )
     [ imCineQ, tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
     PARAM  = P;
     PARAM0 = P0;
-    save( fullfile( outputDir, 'results' ), 'imRlt', 'tRlt', 'dtRlt', 'pixdimAcq', 'imRltQ', 'pixdimRcn', 'PARAM0', 'PARAM', 'E0', 'E', 'mask', 'maskQ', 'maskMoco', 'cineRMSD', 'imCine', 'imCineQ', 'tCine', 'TOL', '-v7.3' )
+    save( fullfile( outputDir, 'results' ), 'imRlt', 'tRlt', 'dtRlt', 'pixdimAcq', 'imRltQ', 'pixdimRcn', 'PARAM0', 'PARAM', 'mask', 'maskQ', 'maskMoco', 'cineRMSD', 'imCine', 'imCineQ', 'tCine', 'TOL', '-v7.3' )
 
 else
     
