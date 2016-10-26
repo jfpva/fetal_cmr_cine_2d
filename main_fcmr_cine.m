@@ -9,14 +9,7 @@ function main_fcmr_cine( fcmrNo, seriesNo )
 %% Dependencies
 
 
-origPath = path;
-resetPath = onCleanup( @() path( origPath ) );
-
-mfileDir = fileparts( which( mfilename ) );
-dependenciesDir = mfileDir;
-
-addpath( genpath( dependenciesDir ) );
-rmpath( genpath( fullfile( dependenciesDir, '_misc' ) )  )
+script_add_dependencies
 
 
 %% Setup
