@@ -146,7 +146,7 @@ isVerbose   = p.Results.verbose;
 get_mask_values = @( x, msk ) double( x( repmat( msk, [1,1,size(x,3)/size(mask,3)] ) ) );
     % param2tform     = @( tx, ty, rz ) affine2d( [cosd(rz), sind(rz), 0; -sind(rz), cosd(rz), 0; tx, ty, 1 ] );
 calc_rmsd       = @( a, b ) sqrt( mean( ( a(:) - b(:) ) .^2 ) );
-calc_rmsd_cine  = @( c2, c1, msk ) calc_rmsd( get_mask_values( abs(c2), mask ), get_mask_values( abs(c1), mask ) );
+calc_rmsd_cine  = @( c2, c1, msk ) calc_rmsd( get_mask_values( abs(c2), msk ), get_mask_values( abs(c1), msk ) );
     % time2cphase     = @( t, rr ) 2*pi*t./rr;
     % calc_rmsd_card  = @( a, b, rr1, rr2 ) rr1 / ( 2*pi ) * sqrt( mean( angle( exp( -sqrt(-1) * ( time2cphase(a(:),rr1) - time2cphase(b(:),rr2) ) ) ) ).^2 );
 
@@ -183,7 +183,7 @@ TOL.imCineRMSD    = 0.005*mean(get_mask_values(abs(imRlt),mask));  % 0.01 pct. o
     %                       get_mask_values( dispMap2, mask ) ) ) ...
     %         < TOL.dispRMSD );
 
-isSameCineIms = @( imCine1, imCine2 ) ( calc_rmsd_cine( imCine1, imCine2, mask ) < TOL.imCineRMSD );
+isSameCineIms = @( imCine1, imCine2, msk ) ( calc_rmsd_cine( imCine1, imCine2, msk ) < TOL.imCineRMSD );
 
 
 % Dimensions
@@ -353,7 +353,6 @@ if isempty( tRTrigger ),
     
     P0.R.tRr = calc_cardiac_timing( tRlt, P0.R.tRTrigger );  
 
-
 else
     
     P0.R.tRTrigger = tRTrigger;
@@ -394,8 +393,7 @@ P0.T.dispMap    = zeros( size( imRlt ) );
 
 P0.P.vox        = ones( size( imRlt ) );
 P0.P.frm        = ones( nFrameRlt, 1 );
-[ P0.P.imCine, P0.P.tCine ] = recon_cine( imRlt, dtRlt, P0.R.tRr, P0.R.rrInterval, P0.T.tform, maskMoco, P0.P.vox, P0.P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-
+[ P0.P.imCine, P0.P.tCine ] = recon_cine( imRltQ, dtRlt, P0.R.tRr, P0.R.rrInterval, P0.T.tform, maskMocoQ, P0.P.vox, P0.P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
 
 % Adjust R-Wave Triggers to Align Cardiac Cycle
 
@@ -405,7 +403,7 @@ if ( doCardsync ),
     % estimate_hr_xf and shifting to align cardiac cycle to save on
     % computations
     
-    tOffset = calc_cine_timing_offset( P0.P.imCine, P0.P.tCine, mask );
+    tOffset = calc_cine_timing_offset( P0.P.imCine, P0.P.tCine, maskQ );
     
     if ( tOffset ~= 0 ), 
 
@@ -421,7 +419,7 @@ if ( doCardsync ),
 
         P0.R.tRr = calc_cardiac_timing( tRlt, P0.R.tRTrigger );  
 
-        [ P0.P.imCine, P0.P.tCine ] = recon_cine( imRlt, dtRlt, P0.R.tRr, P0.R.rrInterval, P0.T.tform, maskMoco, P0.P.vox, P0.P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+        [ P0.P.imCine, P0.P.tCine ] = recon_cine( imRltQ, dtRlt, P0.R.tRr, P0.R.rrInterval, P0.T.tform, maskMocoQ, P0.P.vox, P0.P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
 
     end
 
@@ -430,7 +428,7 @@ end
 
 % Entropy
 
-bwCrop = mask; row = find(sum(bwCrop,2)>0); col = find(sum(bwCrop,1)>0);
+bwCrop = maskQ; row = find(sum(bwCrop,2)>0); col = find(sum(bwCrop,1)>0);
 % E0.time  = imagemetric( P0.P.imCine(row,col,:), {'PC'} );
 % E0.image = imagemetric( P0.P.imCine(row,col,:), {'Cine'} );
 
@@ -485,12 +483,12 @@ P(iIter).R.tRr = calc_cardiac_timing( tRlt, P(iIter).R.tRTrigger );
 
 % Recon Cine
 
-[ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+[ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
 
 
 % Adjust R-Wave Triggers to Align Cardiac Cycle
 
-tOffset = calc_cine_timing_offset( P(iIter).R.imCine, P(iIter).R.tCine, mask );
+tOffset = calc_cine_timing_offset( P(iIter).R.imCine, P(iIter).R.tCine, maskQ );
 
 if ( tOffset ~= 0 ), 
     
@@ -506,8 +504,6 @@ if ( tOffset ~= 0 ),
     
     P(iIter).R.tRr = calc_cardiac_timing( tRlt, P(iIter).R.tRTrigger );
     
-    [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-
 end
 
 
@@ -532,9 +528,13 @@ if ( isSaveResults ),
         fprintf( '![](%s)  \n\n', fullfile( cardSaveDir, 'figs', 'heart_rate_estimate.png' ) )
     end
     
-    recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
+    [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
     movefile( fullfile( outputDir, 'cineq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'cineq_xyt_%s.nii.gz', cardSaveDir ) ) )
     delete( fullfile( outputDir, 'voxprobq_xyt.nii.gz' ) ),
+
+else
+    
+    [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
 
 end
 
@@ -554,7 +554,7 @@ else
 
     % Recon Cine, Measure Entropy
 
-    [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+    % [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
     % E(iIter).R.time  = imagemetric( P(iIter).R.imCine(row,col,:), {'PC'} );
     % E(iIter).R.image = imagemetric( P(iIter).R.imCine(row,col,:), {'Cine'} );
     
@@ -584,7 +584,7 @@ imRltT = transform_imseq( imRlt, P(iIter).T.tform, maskMoco, pixdimAcq );
 
 % Recon Cine, Measure Entropy
 
-P(iIter).T.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+% P(iIter).T.imCine = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
 % E(iIter).T.time  = imagemetric( P(iIter).T.imCine(row,col,:), {'PC'} );
 % E(iIter).T.image = imagemetric( P(iIter).T.imCine(row,col,:), {'Cine'} );
 
@@ -609,9 +609,13 @@ if ( isSaveResults ),
     save_nii( make_nii( abs(imMvg),  pixdimAcqRltNii ), fullfile( mocoSavePath, 'mvg_xyt.nii.gz' ) );
     save_nii( make_nii( abs(imFix),  pixdimAcqRltNii ), fullfile( mocoSavePath, 'fix_xyt.nii.gz' ) );
     
-    recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
+    [ P(iIter).T.imCine, P(iIter).T.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
     movefile( fullfile( outputDir, 'cineq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'cineq_xyt_%s.nii.gz', mocoSaveDir ) ) )
     delete( fullfile( outputDir, 'voxprobq_xyt.nii.gz' ) ),
+    
+else
+    
+    [ P(iIter).T.imCine, P(iIter).T.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
     
 end
 
@@ -621,10 +625,21 @@ else  % if ( doMoco ),
     
     % Recon Cine, Measure Entropy
     
-    P(iIter).T.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+    % P(iIter).T.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
     % E(iIter).T.time  = imagemetric( P(iIter).T.imCine(row,col,:), {'PC'} );
     % E(iIter).T.image = imagemetric( P(iIter).T.imCine(row,col,:), {'Cine'} );
 
+if ( isSaveResults ),
+    
+    [ P(iIter).T.imCine, P(iIter).T.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
+    movefile( fullfile( outputDir, 'cineq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'cineq_xyt_%s.nii.gz', mocoSaveDir ) ) )
+    delete( fullfile( outputDir, 'voxprobq_xyt.nii.gz' ) ),
+    
+else
+    
+    [ P(iIter).T.imCine, P(iIter).T.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
+    
+end
     
 end  % if ( doMoco ),
 
@@ -644,7 +659,7 @@ fprintf( '-----------------------\n\n' )
 
 % Recon Cine, Measure Entropy
 
-P(iIter).P.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+% [ P(iIter).P.imCine, P(iIter).P.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
 % E(iIter).P.time  = imagemetric( P(iIter).P.imCine(row,col,:), {'PC'} );
 % E(iIter).P.image = imagemetric( P(iIter).P.imCine(row,col,:), {'Cine'} );
 
@@ -665,19 +680,22 @@ if ( isSaveResults ),
         fprintf( '![](%s/figs/voxel_error_distn.png)  \n', outrejSaveDir ),
         % fprintf( '![](%s/figs/voxel_probability.png)  \n', outrejSaveDir ),
         fprintf( '![](%s/figs/voxel_prob.png)  \n', outrejSaveDir ),
-        fprintf( '![](%s/figs/frame_probability.png)  \n', outrejSaveDir ),
+        % fprintf( '![](%s/figs/frame_probability.png)  \n', outrejSaveDir ),
         fprintf( '![](%s/figs/frame_potential_distn_and_prob.png)  \n', outrejSaveDir ),
         fprintf( '![](%s/figs/frame_potential_and_prob_v_frame_no.png)  \n', outrejSaveDir ),
-        fprintf( '![](%s/figs/inlier_frame_im.png)  \n', outrejSaveDir ),
-        fprintf( '![](%s/figs/outlier_frame_im.png)  \n\n', outrejSaveDir ),
+        fprintf( '\n\ninlier frame  \n![](%s/figs/inlier_frame_im.png)  \n', outrejSaveDir ),
+        fprintf( '\n\noutlier frame  \n![](%s/figs/outlier_frame_im.png)  \n\n', outrejSaveDir ),
     end
     
     save_nii( make_nii( P(iIter).P.vox, pixdimAcqRltNii ), fullfile( outrejSavePath, 'voxprob_xyt.nii.gz' ) );
     
-    recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
+    [ P(iIter).P.imCine, P(iIter).P.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
     movefile( fullfile( outputDir, 'cineq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'cineq_xyt_%s.nii.gz', outrejSaveDir ) ) )
     movefile( fullfile( outputDir, 'voxprobq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'voxprobq_xyt_%s.nii.gz', outrejSaveDir ) ) )
+else
     
+    [ P(iIter).P.imCine, P(iIter).P.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
+
 end
 
 
@@ -686,10 +704,23 @@ else  % if ( doOutrej ),
     
     % Recon Cine, Measure Entropy
 
-    P(iIter).P.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+    % P(iIter).P.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
     % E(iIter).P.time  = imagemetric( P(iIter).P.imCine(row,col,:), {'PC'} );
     % E(iIter).P.image = imagemetric( P(iIter).P.imCine(row,col,:), {'Cine'} );
 
+    
+if ( isSaveResults ),
+         
+    [ P(iIter).P.imCine, P(iIter).P.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
+    movefile( fullfile( outputDir, 'cineq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'cineq_xyt_%s.nii.gz', outrejSaveDir ) ) )
+    movefile( fullfile( outputDir, 'voxprobq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'voxprobq_xyt_%s.nii.gz', outrejSaveDir ) ) )
+
+else
+    
+    [ P(iIter).P.imCine, P(iIter).P.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
+
+end
+ 
 
 end  % if ( doOutrej ),
 
@@ -700,11 +731,11 @@ end  % if ( doOutrej ),
 if ( doConvergenceTest ) 
     
     if iIter == 1,
-        if ( isSameCineIms( P(iIter).P.imCine,  P0.P.imCine ) ),
+        if ( isSameCineIms( P(iIter).P.imCine,  P0.P.imCine, maskQ ) ),
               break,
         end
     else
-        if ( isSameCineIms( P(iIter).P.imCine,  P(iIter-1).P.imCine ) ),
+        if ( isSameCineIms( P(iIter).P.imCine,  P(iIter-1).P.imCine, maskQ ) ),
               break,
         end
     end
@@ -740,13 +771,13 @@ cineRMSD = nan( nIter, 1 );
     % cardRMSD = nan( nIter, 1 );
     % dispRMSD = nan( nIter, 1 );
 
-cineRMSD(1) = calc_rmsd_cine( P(1).P.imCine, P0.P.imCine, mask );
+cineRMSD(1) = calc_rmsd_cine( P(1).P.imCine, P0.P.imCine, maskQ );
     % cardRMSD(1) = calc_rmsd_card( P(1).R.tRr, P0.R.tRr, P(1).R.rrInterval, P0.R.rrInterval );
     % dispRMSD(1) = calc_rmsd( get_mask_values( P(1).T.dispMap, mask ), get_mask_values( P0.T.dispMap, mask ) );
 
 for iIter = 2:nIter, 
        
-    cineRMSD(iIter) = calc_rmsd_cine( P(iIter).P.imCine, P(iIter-1).P.imCine, mask );
+    cineRMSD(iIter) = calc_rmsd_cine( P(iIter).P.imCine, P(iIter-1).P.imCine, maskQ );
         % cardRMSD(iIter) = calc_rmsd_card( P(iIter).R.tRr, P(iIter-1).R.tRr, P(iIter).R.rrInterval, P(iIter-1).R.rrInterval );
         % dispRMSD(iIter) = calc_rmsd( get_mask_values( P(iIter).T.dispMap, mask ), get_mask_values( P(iIter-1).T.dispMap, mask ) );
 
@@ -778,7 +809,7 @@ if ( isVerbose ),
     
     plot( [0,(nIter+1)], TOL.imCineRMSD*ones(2,1), 'c-', 1:nIter, cineRMSD, 'bo-', 'LineWidth', 1.5 )
     xlabel('iteration')
-    ylabel('RMSD |X| (a.u.)')
+    ylabel('RMSD |Y| (a.u.)')
     grid on
     set(gca,'XLim',[0.5,nIter+0.5])
         
