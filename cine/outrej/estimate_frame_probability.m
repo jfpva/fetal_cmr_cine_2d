@@ -39,7 +39,7 @@ addRequired(  p, 'voxProb', @(x) validateattributes( x, {'numeric'}, ...
 addParameter( p, 'mask', default.mask, ...
         @(x) validateattributes( x, {'logical'}, ...
         {'size',[size(voxProb(:,:,1)),NaN]}, mfilename ) );
-
+    
 addParameter( p, 'verbose',     default.isVerbose, ...
         @(x) validateattributes( x, {'logical'}, ...
         {}, mfilename ) );
@@ -154,85 +154,39 @@ fprintf( '\n\t\testimate_frame_probability\n' ),
 fprintf( '\t\t\tinlier class:  c * pdf(''Rician'', 1-x, 1-u, s ), u = %6.4f, s = %6.4f, %3i/%-3i frames (%.2f%%)\n', u, s, nFrmIn, nFrmTot, pFrmIn )
 fprintf( '\t\t\toutlier class: (1-c) * m,                       m = %6.4f, c = %6.4f, %3i/%-3i frames (%.2f%%)\n', m, c, nFrmOut, nFrmTot, pFrmOut )
 
+
+% Visualise Frame Potential Distribution
+
+hFig2 = figure( 'Name', 'frame_potential_distn_and_prob' );
+
+rgbIn  = [255,255,222]/255;
+rgbOut = [213,62,79]/255;
+tmp = bone(5);
+rgbBar = tmp(4,:);
+clear tmp
+
+yyaxis left
+hB = bar( fBinCentre, fBinDensity );
+hB.FaceColor = rgbBar;
+xlabel( 'frame potential' )
+x = linspace(min(f),max(f),10000);  
+hold on
+plot(x,fPdfMix(x,u,s,c),'LineWidth',2,'Color','y')
+plot(x,fPdfIn(x,u,s,c),'--','LineWidth',1,'Color',rgbIn)
+plot(x,fPdfOut(x,u,s,c),'--','LineWidth',1,'Color',rgbOut)
+grid on
+ylabel('density')
+yyaxis right
+plot(x,fWeight(x,u,s,c),'LineWidth',2)
+ylabel('probability')
+
+
 end
 
 
 % Parameter Output
 
-P = struct( 'u', u, 's', s, 'm', m, 'c', c );
-
-
-%% OR... Identify Frame Outliers Using Mixture of Gaussians 
-% inlier class:  gaussian
-% outlier class: gaussian
-
-% fPdfIn  = @( x, u, s, c ) c * normpdf( x, u, s );  
-% fPdfIn  = @( x, u, s, c ) c * pdf('Rician', 1-x, 1-u, s );   
-% fPdfOut = @( x, u, s, c ) (1-c) * normpdf( x, u, s );
-% 
-% fPdfMix = @( x, u1, s1, u2, s2, c ) fPdfIn( x, u1, s1, c ) + fPdfOut( x, u2, s2, c );
-% fLogPdfMix = @( x, u1, s1, u2, s2, c ) log( fPdfIn( x, u1, s1, c ) + fPdfOut( x, u2, s2, c ) );
-% 
-% fWeight = @( x, u1, s1, u2, s2, c ) fPdfIn( x, u1, s1, c ) ./ fPdfMix( x, u1, s1, u2, s2, c );
-% 
-% % param         u1  s1    u2  s2     c
-% fC0  = 0.9;
-% fIn  = f(f>prctile(f,100*(1-fC0)));
-% fOut = f(f<prctile(f,100*(1-fC0)));
-% paramStart = [ mean(fIn) std(fIn) mean(fOut) std(fOut) fC0 ];
-% paramLower = [ 0   0     0   0   0   ];
-% paramUpper = [ 1   inf   1   inf 1   ];
-% 
-% opt = optimset( 'MaxFunEvals', 800, 'MaxIter', 400 );
-% [fParamEst,fParamCI] = mle( f, 'logpdf', fLogPdfMix, 'start', paramStart, 'lowerbound', paramLower, 'upperbound', paramUpper, 'Options', opt );
-% 
-% u1 = fParamEst(1);
-% s1 = fParamEst(2);
-% u2 = fParamEst(3);
-% s2 = fParamEst(4);
-% c = fParamEst(5);
-% 
-% frmProb = fWeight(f,u1,s1,u2,s2,c);
-% 
-% nFrmOut = sum(sum(sum(frmProb<0.5)));
-% nFrmTot = numel(frmProb);
-% 
-% 
-% % Verbose Output
-% 
-% if ( isVerbose ),
-%     
-% [ fBinDensity, fBinEdges ] = histcounts( f, 'BinMethod', 'auto', 'Normalization', 'pdf' );
-% if ( numel(fBinDensity) < sqrt(numel(f)) ),
-%     [ fBinDensity, fBinEdges ] = histcounts( f, 'BinMethod', 'fd', 'Normalization', 'pdf' );
-% end
-% fBinCentre = fBinEdges(2:end) - mean(diff(fBinEdges))/2;
-% 
-% figure('Name','frame_probabilities')
-% yyaxis left
-% hB = bar( fBinCentre, fBinDensity );
-% hB.FaceColor = [.5 .5 1 ];
-% xlabel( 'frame potential' )
-% x = linspace(min(f),max(f),10000);  % x = linspace(min(f),max(f),10000);
-% hold on
-% plot(x,fPdfMix(x,u1,s1,u2,s2,c),'LineWidth',2)
-% plot(x,fPdfIn(x,u1,s1,c),'g--','LineWidth',1)
-% plot(x,fPdfOut(x,u2,s2,c),'r--','LineWidth',1)
-% grid on
-% ylabel('density')
-% yyaxis right
-% plot(x,fWeight(x,u1,s1,u2,s2,c),'LineWidth',2)
-% ylabel('probability')
-% title( 'Frame-Wise Outlier Rejection' )
-%         
-% fprintf( 'frame outliers: u1 = %6.4f, s1 = %6.4f, u2 = %6.4f, s2 = %6.4f, c = %6.4f, pct outlier frames %.2f (%i/%i)\n', u1, s1, u2, s2, c, 100*nFrmOut/nFrmTot, nFrmOut, nFrmTot ) % fprintf( 'frame outliers: u1 = %7.4f (%7.4f,%7.4f), s1 = %7.4f (%7.4f,%7.4f), u2 = %7.4f (%7.4f,%7.4f), s2 = %7.4f (%7.4f,%7.4f), c = %7.4f (%7.4f,%7.4f), outlier frames (p_{k}<0.5) = %i/%i (%.2f%%)\n', u1, fParamCI(1,1), fParamCI(2,1), s1, fParamCI(1,2), fParamCI(2,2), u2, fParamCI(1,3), fParamCI(2,3), s2, fParamCI(1,4), fParamCI(2,4), c, fParamCI(1,5), fParamCI(2,5), nFrmOut, nFrmTot, 100*nFrmOut/nFrmTot )
-% 
-% end
-% 
-% 
-% % Output
-% 
-% P = struct( 'u1', u1, 's1', s1, 'u2', u2, 's2', s2, 'c', c );
+P = struct( 'u', u, 's', s, 'm', m, 'c', c );  % P = struct( 'framePotential', f, 'fPdfIn', fPdfIn, 'v', v, 'fPdfOut', fPdfOut, 'fPdfMix', fPdfMix, 'fWeight', fWeight, 'u', u, 's', s, 'm', m, 'c', c );
 
 
 end  % estimate_frame_probability(...)

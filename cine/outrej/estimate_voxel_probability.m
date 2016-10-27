@@ -332,18 +332,74 @@ hAx6.CLim = dLim2D;
 
 hFig2 = figure( 'Name', 'voxel_probability' );
 
-show_hist2d( wBinDensity ),
-hAx = gca;
+show_hist2d( wBinDensity )
+
+colormap(pink)
+
+hAx2 = gca;
 axis on xy,
-xlabel('\Re(error)'),
-ylabel('\Im(error)'),
+xlabel('\Re(\ite\rm)'),
+ylabel('\Im(\ite\rm)'),
 set(gca,'CLim',[0,1])
 title('Posterior Probability')
-colormap(pink),
 hFig2.Position = [364 162 554 384];
-hAx.YTick = hAx.XTick;
-hCb = colorbar;
+hAx2.YTick = hAx2.XTick;
+hCb = colorbar('Location','east','Color',0.85*[1,1,1]);
 hCb.Label.String = 'probability';
+hCb.Position(3) = hCb.Position(3)/2;
+hCb.Position(1) = hCb.Position(1) + hCb.Position(3);
+hCb.Ticks = [ hCb.Ticks(1), hCb.Ticks(end) ];
+
+
+% Visualise Voxel Error Distribution
+
+hFig3 = figure( 'Name', 'voxel_error_distn' );
+
+eBinDensityNan = eBinDensity; 
+eBinDensityNan( eBinDensity == 0 ) = NaN; 
+
+imshow(eBinDensityNan,[],'XData',eBinCentreReal,'YData',eBinCentreImag,'InitialMagnification',500,'Colormap',flip(bone));
+hFig3.Position = hFig2.Position; 
+axis on xy,
+hAx3 = gca;
+hAx3.CLim = [ hAx3.CLim(1)-range(hAx3.CLim)/20, hAx3.CLim(2) ];
+xlabel('\Re(\ite\rm)'),
+ylabel('\Im(\ite\rm)'),
+hAx3.YTick = hAx3.XTick;
+hCb = colorbar('Location','east','Color',0.15*[1,1,1]);
+hCb.Label.String = 'density';
+hCb.Position(3) = hCb.Position(3)/2;
+hCb.Position(1) = hCb.Position(1) + hCb.Position(3);
+hCb.Ticks = [];
+
+
+% Visualise Posterior Probability to Match hFig3
+
+hFig4 = figure( 'Name', 'voxel_prob' );
+
+eBinCentreRealHires = linspace(eBinCentreReal(1),eBinCentreReal(end),1000);
+eBinCentreImagHires = linspace(eBinCentreImag(1),eBinCentreImag(end),1000);
+[eGridRealHires,eGridImagHires] = meshgrid( eBinCentreRealHires, eBinCentreImagHires );
+wBinDensityHires= vWeight( complex( eGridRealHires, eGridImagHires ), s1, s2, c );
+
+cMapProb = interp1( [213,62,79;255,255,222]/255,linspace(1,2,1024) );
+
+imshow(wBinDensityHires,[],'XData',eBinCentreRealHires,'YData',eBinCentreImagHires,'Colormap',cMapProb);
+
+hAx4 = gca;
+axis on xy,
+xlabel('\Re(\ite\rm)'),
+ylabel('\Im(\ite\rm)'),
+set(gca,'CLim',[0,1])
+hFig4.Position = hFig3.Position;
+hAx4.Position = hAx3.Position;
+hAx4.YTick = hAx4.XTick;
+hCb = colorbar('Location','east','Color',0.85*[1,1,1]);
+hCb.Label.String = '\itp^{voxel}\rm';
+hCb.Position(3) = hCb.Position(3)/2;
+hCb.Position(1) = hCb.Position(1) + hCb.Position(3);
+hCb.Ticks = [ hCb.Ticks(1), hCb.Ticks(end) ];
+
 
 end
 
@@ -356,12 +412,12 @@ voxProb = vWeight(err,s1,s2,c);
 
 % Parameters
 
-P.u1 = u1;  % PARAM.inlier.real.mean = u1;
-P.s1 = s1;  % PARAM.inlier.real.stdv = s1;
-P.u2 = u2;	% PARAM.inlier.imag.mean = u2;
-P.s2 = s2;  % PARAM.inlier.imag.stdv = s2;
-P.m  = m;   % PARAM.outlier.density  = m;
-P.c  = c;   % PARAM.mix.c            = c; 
+P.u1 = u1;  
+P.s1 = s1;  
+P.u2 = u2;	
+P.s2 = s2;  
+P.m  = m;   
+P.c  = c;   
 
 
 end  % estimate_voxel_probability(...)

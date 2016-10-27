@@ -30,6 +30,7 @@ alpha = 100;
 %% Directories 
 
 
+mfileDir = fileparts( mfilename( 'fullpath' ) );
 resultsDir = fullfile( mfileDir, '..', 'results', idStr );
 
 
@@ -174,11 +175,11 @@ diary( 'off' );
 
 %% rlt2cine
 
+
 [ imCine, tCine ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'outputDir', cineDir, 'verbose', true );
 
 [ imCineNoMoco, tCineNoMoco ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'doMoco', false, 'outputDir', strcat( cineDir, '_noMoco' ), 'doConvergenceTest', true, 'verbose', true );
 [ imCineNoOutrej, tCineNoOutrej ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'doOutrej', false, 'outputDir', strcat( cineDir, '_noOutrej' ), 'doConvergenceTest', true, 'verbose', true );
-
 
 
 end  % main_fcmr_cine(...)

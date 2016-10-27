@@ -637,7 +637,7 @@ if ( doOutrej ),
     
 fprintf( '\n%02i c. Outlier Rejection\n', iIter )
 fprintf( '-----------------------\n\n' )
-
+    
     
 [ P(iIter).P.vox, P(iIter).P.frm ] = outlier_rejection_step( imRlt, P(iIter).R.tRr, dtRlt, P(iIter).R.rrInterval, 'mask', mask, 'transformations', P(iIter).T.tform, 'transformationMask', maskMoco, 'pixdim', pixdimAcq, 'voxProb', P(iIter).P.vox, 'frmProb', P(iIter).P.frm, 'verbose', isVerbose );
 
@@ -652,18 +652,24 @@ P(iIter).P.imCine = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInter
 % Save Results
 
 if ( isSaveResults ),
-
+    
     outrejSaveDir  = sprintf( '%02ic_outrej', iIter );
     outrejSavePath = fullfile( outputDir, outrejSaveDir );
-    
+   
     save_figs( fullfile( outrejSavePath ) ),
     
     close all,
     
     if ( isVerbose ),
         fprintf( '\n![](%s/figs/voxel_error_distribution.png)  \n', outrejSaveDir ),
-        fprintf( '![](%s/figs/voxel_probability.png)  \n', outrejSaveDir ),
-        fprintf( '![](%s/figs/frame_probability.png)  \n\n', outrejSaveDir ),
+        fprintf( '![](%s/figs/voxel_error_distn.png)  \n', outrejSaveDir ),
+        % fprintf( '![](%s/figs/voxel_probability.png)  \n', outrejSaveDir ),
+        fprintf( '![](%s/figs/voxel_prob.png)  \n', outrejSaveDir ),
+        fprintf( '![](%s/figs/frame_probability.png)  \n', outrejSaveDir ),
+        fprintf( '![](%s/figs/frame_potential_distn_and_prob.png)  \n', outrejSaveDir ),
+        fprintf( '![](%s/figs/frame_potential_and_prob_v_frame_no.png)  \n', outrejSaveDir ),
+        fprintf( '![](%s/figs/inlier_frame_im.png)  \n', outrejSaveDir ),
+        fprintf( '![](%s/figs/outlier_frame_im.png)  \n\n', outrejSaveDir ),
     end
     
     save_nii( make_nii( P(iIter).P.vox, pixdimAcqRltNii ), fullfile( outrejSavePath, 'voxprob_xyt.nii.gz' ) );
@@ -1124,6 +1130,103 @@ imRef = calc_imref( voxProb, frmProb );
 
 [ voxProb, voxParam ] = estimate_voxel_probability( imSeq, imRef, 'mask', mask, 'pctexc', pctexc, 'verbose', isVerbose );
 [ frmProb, frmParam ] = estimate_frame_probability( voxProb, 'mask', mask, 'verbose', isVerbose );
+
+if ( isVerbose ),
+    
+    imErr = imSeq - imRef;
+    
+    framePotential = double(squeeze(sqrt(sum(sum(bsxfun(@times,mask,voxProb.^2)))./sum(sum(mask)))));
+   
+    % Identify Crop Window
+    
+    [ indRow, indCol ] = get_im_crop_indices( mask, pixdim(1), pixdim(2) );
+    
+    % ROI
+
+    B = bwboundaries( mask(indRow,indCol) );
+	
+    % Identify Example Frames
+    
+    frameRange = 11:(numel(framePotential)-10);
+    
+    [~,indFrm] = min( framePotential(frameRange) );
+    indFrmOut = indFrm+frameRange(1)-1;
+	[~,indFrm] = min( framePotential( framePotential(frameRange)>0.5) );
+    indFrmIn = indFrm+frameRange(1)-1;
+    clear indFrm,
+    
+    hFig = figure( 'Name', 'frame_potential_and_prob_v_frame_no' );
+    hFig.Position = [ hFig.Position(1) hFig.Position(2) hFig.Position(3) hFig.Position(4)/2 ];
+    yyaxis left
+    hold on
+    plot( indFrmIn, framePotential(indFrmIn), 'o', 'MarkerSize', 12, 'Color', [0,0.45,0.74].^0.5 )
+    plot( indFrmOut, framePotential(indFrmOut), 'x', 'MarkerSize', 12, 'Color', [0,0.45,0.74].^0.5 )
+    plot( framePotential, 'LineWidth', 2, 'LineStyle', '-', 'Color', [0,0.45,0.74] )
+    hold off
+    ylabel( 'frame potential' )
+    xlabel( 'real-time frame no.' )
+    legend('inlier frame','outlier frame','Location','best')
+    hAx = gca;
+    hAx.YLim = [ hAx.YLim(1), 1 ];
+    yyaxis right
+	plot( frmProb, 'LineWidth', 2, 'LineStyle', '-' )
+    ylabel( 'frame probability' )
+    hAx = gca;
+    hAx.YLim = [ hAx.YLim(1), 1 ];
+    hAx.XLim = [ 0 numel(framePotential)+1 ];
+    
+    % Visualise
+    
+    for iI = 1:2, 
+    
+        if iI == 1,
+            indFrm = indFrmOut;
+            hFig = figure( 'Name', 'outlier_frame_im' );
+        elseif iI == 2,
+            indFrm = indFrmIn;
+            hFig = figure( 'Name', 'inlier_frame_im' );
+        end
+    
+    hFig.Position = [139 215 1004 282];
+  
+    
+    % Real-Time Image + ROI
+
+    hAx1 = subplot(1,4,1);
+    imshow(abs(imSeq(indRow,indCol,indFrm)),[]),
+    hold on, line(B{1}(:,2),B{1}(:,1),'LineWidth',2,'LineStyle',':','Color','y'), hold off
+    ylabel( sprintf( 'frame no. %i', indFrm ) )
+    hCb1 = colorbar('Location','SouthOutside');
+    hCb1.Label.String = '|\itx\rm|';
+        
+    % Reference Image
+    
+    hAx2 = subplot(1,4,2);
+    imshow(abs(imRef(indRow,indCol,indFrm)),[]),
+    hold on, line(B{1}(:,2),B{1}(:,1),'LineWidth',2,'LineStyle',':','Color','y'), hold off
+    hCb2 = colorbar('Location','SouthOutside');
+    hCb2.Label.String = '|\itx\^\rm|';
+    hAx2.CLim = hAx1.CLim;
+    
+    % Error Map
+    
+    hAx3 = subplot(1,4,3);
+    imshow(abs(imErr(indRow,indCol,indFrm)),[]),
+    hold on, line(B{1}(:,2),B{1}(:,1),'LineWidth',2,'LineStyle',':','Color','y'), hold off
+	hCb3 = colorbar('Location','SouthOutside');
+    hCb3.Label.String = '|\ite\rm|';
+    
+    % Probability Map
+    
+    hAx4 = subplot(1,4,4);
+    imshow(voxProb(indRow,indCol,indFrm)*frmProb(indFrm,1),[]),
+    hold on, line(B{1}(:,2),B{1}(:,1),'LineWidth',2,'LineStyle',':','Color','y'), hold off
+    hCb4 = colorbar('Location','SouthOutside');
+    hCb4.Label.String = '\itp\rm';
+    
+    end
+    
+end
 
 
 end  % outlier_rejection_step(...)
