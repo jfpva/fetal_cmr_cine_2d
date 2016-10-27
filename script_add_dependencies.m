@@ -17,4 +17,4 @@ for iD = 1:numel(excludeDir),
     end
 end
 
-clearvars -except resetPath
+clear StackTrace indWorkspace dependenciesDir excludeDir iD
