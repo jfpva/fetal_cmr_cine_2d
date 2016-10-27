@@ -565,6 +565,10 @@ end  % if ( doCardsync ),
 %% Motion-Correction
 
 
+mocoSaveDir  = sprintf( '%02ib_moco', iIter );
+mocoSavePath = fullfile( outputDir, mocoSaveDir );
+
+
 if ( doMoco ),
 
     
@@ -592,10 +596,7 @@ imRltT = transform_imseq( imRlt, P(iIter).T.tform, maskMoco, pixdimAcq );
 % Save Results
 
 if ( isSaveResults ),
-    
-    mocoSaveDir  = sprintf( '%02ib_moco', iIter );
-    mocoSavePath = fullfile( outputDir, mocoSaveDir );
-    
+       
     save_figs( mocoSavePath ),
     
     close all,
@@ -647,6 +648,10 @@ end  % if ( doMoco ),
 %% Outlier Rejection
 
 
+outrejSaveDir  = sprintf( '%02ic_outrej', iIter );
+outrejSavePath = fullfile( outputDir, outrejSaveDir );
+
+
 if ( doOutrej ),
 
     
@@ -666,11 +671,9 @@ fprintf( '-----------------------\n\n' )
 
 % Save Results
 
+
 if ( isSaveResults ),
-    
-    outrejSaveDir  = sprintf( '%02ic_outrej', iIter );
-    outrejSavePath = fullfile( outputDir, outrejSaveDir );
-   
+      
     save_figs( fullfile( outrejSavePath ) ),
     
     close all,
@@ -692,6 +695,7 @@ if ( isSaveResults ),
     [ P(iIter).P.imCine, P(iIter).P.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
     movefile( fullfile( outputDir, 'cineq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'cineq_xyt_%s.nii.gz', outrejSaveDir ) ) )
     movefile( fullfile( outputDir, 'voxprobq_xyt.nii.gz' ), fullfile( outputDir, sprintf( 'voxprobq_xyt_%s.nii.gz', outrejSaveDir ) ) )
+
 else
     
     [ P(iIter).P.imCine, P(iIter).P.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
