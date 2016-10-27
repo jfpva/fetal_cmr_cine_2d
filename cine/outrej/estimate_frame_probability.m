@@ -159,8 +159,9 @@ fprintf( '\t\t\toutlier class: (1-c) * m,                       m = %6.4f, c = %
 
 hFig2 = figure( 'Name', 'frame_potential_distn_and_prob' );
 
-rgbIn  = [255,255,222]/255;
-rgbOut = [213,62,79]/255;
+rgbIn  = [127,255,79]/255;
+rgbOut = [107,62,79]/255;
+rgbMix = mean([rgbIn;rgbOut],1);
 tmp = bone(5);
 rgbBar = tmp(4,:);
 clear tmp
@@ -171,7 +172,7 @@ hB.FaceColor = rgbBar;
 xlabel( 'frame potential' )
 x = linspace(min(f),max(f),10000);  
 hold on
-plot(x,fPdfMix(x,u,s,c),'LineWidth',2,'Color','y')
+plot(x,fPdfMix(x,u,s,c),'LineWidth',2,'Color',rgbMix)
 plot(x,fPdfIn(x,u,s,c),'--','LineWidth',1,'Color',rgbIn)
 plot(x,fPdfOut(x,u,s,c),'--','LineWidth',1,'Color',rgbOut)
 grid on
