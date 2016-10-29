@@ -4,6 +4,7 @@ function dispMap = calc_dispmap_from_affine2d( A, R )
 %   dispMap = calc_dispmap( A, R ) returns displacement map, 
 %   dispmap, for each voxel specified by imref2d object, R, subject to 
 %   rigid tform struc, A.
+%   dispMap is complex with tx = real(dispMap) and ty = imag(dispMap).
 
 % jfpva (joshua.vanamerom@kcl.ac.uk)
 
