@@ -833,90 +833,54 @@ if ( isVerbose ),
 end
 
 
-%% Summarise Entropy
+%% Image Quality Metric
 
-
-%{
 
 if ( isVerbose ),
     
-    entropyTimeVsR = E0.time;
-    entropyTimeVsT = E0.time;
-    entropyTimeVsP = E0.time;
-    
-    entropyImageVsR = E0.image;
-    entropyImageVsT = E0.image;
-    entropyImageVsP = E0.image;
-    
+    imquality0 = calc_imseq_metric( P0.P.imCine, maskQ );
+	   
     for iIter = 1:nIter,
         
-        entropyTimeVsR(end+1) = E(iIter).R.time;
-        entropyTimeVsT(end+1) = E(iIter).T.time; 
-        entropyTimeVsP(end+1) = E(iIter).P.time; 
-            
-        entropyImageVsR(end+1) = E(iIter).R.image;
-        entropyImageVsT(end+1) = E(iIter).T.image; 
-        entropyImageVsP(end+1) = E(iIter).T.image; 
+        imqualityVsR(iIter) = calc_imseq_metric( P(iIter).R.imCine, maskQ );
+        imqualityVsT(iIter) = calc_imseq_metric( P(iIter).T.imCine, maskQ );
+        imqualityVsP(iIter) = calc_imseq_metric( P(iIter).P.imCine, maskQ );
         
     end
    
-    figure( 'Name', 'entropy' )
+    figure( 'Name', 'image_quality_v_iteration' )
     
-    yyaxis left
-    
-    plot( 0:nIter, entropyTimeVsP, 'LineWidth', 1 ), 
-    
-    yyaxis right
-    
-    plot( 0:nIter, entropyImageVsP, 'LineWidth', 1 ), 
-    
-    yyaxis left
+    plot( 0:nIter, [imquality0, imqualityVsP ], 'LineWidth', 1 ), 
     
     hold on
     
-    p1 = plot( 0:nIter, entropyTimeVsR, 'x', 'MarkerSize', 8 );
-    p2 = plot( 0:nIter, entropyTimeVsT, '+', 'MarkerSize', 8 );
-    p3 = plot( 0:nIter, entropyTimeVsP, 'o', 'MarkerSize', 8 );
+    p1 = plot( 0:nIter, [imquality0, imqualityVsR ], 'x', 'MarkerSize', 8 );
+    p2 = plot( 0:nIter, [imquality0, imqualityVsT ], '+', 'MarkerSize', 8 );
+    p3 = plot( 0:nIter, [imquality0, imqualityVsP ], 'o', 'MarkerSize', 8 );
     
+    hold off
     
     xlabel('iteration')
-    ylabel('Time Entropy (a.u.)')
-    
-    set(gca,'XLim',[-0.5,maxIter+0.5],'XTick',0:maxIter,'YTick',[]), 
-    
-    legend('C','T','P')
-    
-	yyaxis right
-        
-    hold on
-    
-    p4 = plot( 0:nIter, entropyImageVsR, 'x', 'MarkerSize', 8 );
-    p5 = plot( 0:nIter, entropyImageVsT, '+', 'MarkerSize', 8 );
-    p6 = plot( 0:nIter, entropyImageVsP, 'o', 'MarkerSize', 8 );
-  
-    ylabel('Image Entropy (a.u.)')
+    ylabel('Entropy (a.u.)')
     
     set(gca,'XLim',[-0.5,nIter+0.5],'XTick',0:nIter,'YTick',[]), 
-    
-    legend( [p1,p2,p3,p4,p5,p6], 'C','T','P','C','T','P')        
-    
+        
+    legend( [p1,p2,p3], 'cardsync','moco','outrej' )        
     
     if ( isSaveResults ),
-        
-        fprintf( '\nEntropy\n' )
-        fprintf( '-------\n\n' )
         
         save_figs( outputDir ),
         
         close all,
         
-        fprintf( '![](figs/entropy.png)  \n' )
+        fprintf( '\nEntropy\n' )
+        fprintf( '-------\n\n' )
+        
+        fprintf( '![](figs/image_quality_v_iteration.png)  \n' )
         
     end
     
 end
-
-%}
 
 
 %% Summarise Results
@@ -937,7 +901,7 @@ end
 
 if ( isVerbose )
     
-    hFig = figure( 'Name', 'iterative_corrections_summary' );
+    hFig = figure( 'Name', 'correction_v_iteration' );
     hFig.Position(4) = hFig.Position(3)/3;
     
     subplot(1,3,1),
@@ -946,7 +910,7 @@ if ( isVerbose )
     title( 'Cardiac Synchronisation' )
     xlabel( 'iteration' )
     ylabel( 'baseline heart rate (bpm)' )
-    set(gca,'XLim', [0.5,nIter+0.5] ),
+    set(gca,'XLim', [0.5,nIter+0.5], 'XTick', 1:nIter ),
     grid on
     
     subplot(1,3,2),
@@ -954,7 +918,7 @@ if ( isVerbose )
     title( 'Motion Correction' )
     xlabel( 'iteration' )
     ylabel( 'mean displacment (mm)' )
-    set(gca,'XLim', [0.5,nIter+0.5] ),
+    set(gca,'XLim', [0.5,nIter+0.5], 'XTick', 1:nIter ),
     grid on
     
     subplot(1,3,3)
@@ -967,7 +931,7 @@ if ( isVerbose )
     yyaxis right
     plot( R.pctFrmOutlier, '.-', 'LineWidth', 1.5, 'MarkerSize', 24 )
     ylabel( 'frame-wise outliers (%)' )
-    set(gca,'XLim', [0.5,nIter+0.5] ),
+    set(gca,'XLim', [0.5,nIter+0.5], 'XTick', 1:nIter ),
     yyaxis left
     hold on
     plot( R.pctTotOutlier, '.-', 'Color', [1,0,1], 'LineWidth', 1.5, 'MarkerSize', 24 )
@@ -984,7 +948,7 @@ if ( isVerbose )
         
         fprintf( '\nIterative Corrections\n' )
         fprintf( '---------------------\n\n' )
-        fprintf( '![](figs/iterative_corrections_summary.png)  \n' )
+        fprintf( '![](figs/correction_v_iteration.png)  \n' )
         
     end
     
