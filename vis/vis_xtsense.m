@@ -21,8 +21,6 @@ pt = bwmorph( mask, 'shrink', inf );
 
 %% Colormaps
 
-addpath( '~/Documents/MATLAB/Toolboxes/phasemap_v1.0/phasemap/' )
-
 cMapSize = 1024; 
 
 % Magnitude Colour Map (Log-Scale)
