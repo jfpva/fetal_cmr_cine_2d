@@ -833,47 +833,6 @@ if ( isVerbose ),
 end
 
 
-%{
-NOTE: if using the code below, update imCineRMSD calculation to include abs()
-imCineRMSD = nan( 3*nIter, 1 );
-
-imCineRMSD(1) = calc_rmsd( get_mask_values( P(1).R.imCine, mask ), get_mask_values( P0.P.imCine, mask ) );
-
-for iIter = 1:nIter, 
-    
-    if ( iIter > 1 )
-            imCineRMSD(3*(iIter-1)+1) = calc_rmsd( get_mask_values( P(iIter).R.imCine, mask ), get_mask_values( P(iIter-1).P.imCine, mask ) );
-    end
-    
-    imCineRMSD(3*(iIter-1)+2) = calc_rmsd( get_mask_values( P(iIter).T.imCine, mask ), get_mask_values( P(iIter).R.imCine, mask ) );
-    imCineRMSD(3*(iIter-1)+3) = calc_rmsd( get_mask_values( P(iIter).P.imCine, mask ), get_mask_values( P(iIter).T.imCine, mask ) );
-
-end
-
-if ( isVerbose ),
-   
-    figure( 'Name', 'cine_convergence' )
-    
-    plot( [0,(nIter+1)], TOL.imCineRMSD*ones(2,1), 'c-', 1:(1/3):(nIter+2/3), abs(imCineRMSD), 'bo-', 'LineWidth', 1.5 )
-    xlabel('iteration')
-    ylabel('RMSD |X| (a.u.)')
-    set(gca,'XLim',[1-0.5,nIter+2/3+0.5])
-    grid on
-        
-    if ( isSaveResults ),
-        
-        save_figs( outputDir ),
-        
-        close all,
-        
-        fprintf( '![](figs/cine_convergence.png)  \n' )
-        
-    end
-    
-end
-%}
-
-
 %% Summarise Entropy
 
 
@@ -960,16 +919,90 @@ end
 %}
 
 
+%% Summarise Results
+
+
+for iIter = 1:nIter,
+   
+    R.rrInterval(iIter)     = P(iIter).R.rrInterval;
+    
+    R.meanDisp(iIter)       = mean( get_mask_values( abs(P(iIter).T.dispMap), mask ) );
+    
+    R.pctVoxOutlier(iIter)  = 100 * sum( get_mask_values( P(iIter).P.vox, mask ) <= 0.5 ) / numel( P(iIter).P.vox );
+    R.pctFrmOutlier(iIter)  = 100 * sum( P(iIter).P.frm <= 0.5 ) / numel( P(iIter).P.frm );
+    R.pctTotOutlier(iIter)  = 100 * sum( get_mask_values( bsxfun( @times, P(iIter).P.vox, reshape( P(iIter).P.frm, 1, 1, [] ) ), mask ) <= 0.5 ) / numel( P(iIter).P.vox );
+        
+end
+
+
+if ( isVerbose )
+    
+    hFig = figure( 'Name', 'iterative_corrections_summary' );
+    hFig.Position(4) = hFig.Position(3)/3;
+    
+    subplot(1,3,1),
+    hr = 60e3./(1e3*R.rrInterval);
+    plot( hr, '.-', 'LineWidth', 1.5, 'MarkerSize', 24 )
+    title( 'Cardiac Synchronisation' )
+    xlabel( 'iteration' )
+    ylabel( 'baseline heart rate (bpm)' )
+    set(gca,'XLim', [0.5,nIter+0.5] ),
+    grid on
+    
+    subplot(1,3,2),
+    plot( R.meanDisp, '.-', 'LineWidth', 1.5, 'MarkerSize', 24 )
+    title( 'Motion Correction' )
+    xlabel( 'iteration' )
+    ylabel( 'mean displacment (mm)' )
+    set(gca,'XLim', [0.5,nIter+0.5] ),
+    grid on
+    
+    subplot(1,3,3)
+    yyaxis left
+    plot( R.pctVoxOutlier, '.-', 'LineWidth', 1.5, 'MarkerSize', 24 )
+    title( 'Outlier Rejection' )
+    xlabel( 'iteration' )
+    ylabel( 'voxel-wise outliers (%)' )
+    set(gca,'XLim', [0.5,nIter+0.5] ),
+    yyaxis right
+    plot( R.pctFrmOutlier, '.-', 'LineWidth', 1.5, 'MarkerSize', 24 )
+    ylabel( 'frame-wise outliers (%)' )
+    set(gca,'XLim', [0.5,nIter+0.5] ),
+    yyaxis left
+    hold on
+    plot( R.pctTotOutlier, '.-', 'Color', [1,0,1], 'LineWidth', 1.5, 'MarkerSize', 24 )
+    hold off
+    grid on
+    legend('p^{voxel}','p^{frame}','p','Location','best')
+   
+       
+    if ( isSaveResults ),
+        
+        save_figs( outputDir ),
+        
+        close all,
+        
+        fprintf( '\nIterative Corrections\n' )
+        fprintf( '---------------------\n\n' )
+        fprintf( '![](figs/iterative_corrections_summary.png)  \n' )
+        
+    end
+    
+    
+end
+
+
 %% Save Final Results
 
 
 if ( isSaveResults )
     
-    [ imCine, tCine ] = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
-    [ imCineQ, tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
+    [ imCine, tCine ] = recon_cine( imRlt, dtRlt, P(nIter).R.tRr, P(nIter).R.rrInterval, P(nIter).T.tform, maskMoco, P(nIter).P.vox, P(nIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+    [ imCineQ, tCine ] = recon_cine( imRltQ, dtRlt, P(nIter).R.tRr, P(nIter).R.rrInterval, P(nIter).T.tform, maskMocoQ, P(nIter).P.vox, P(nIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, outputDir );
     PARAM  = P;
     PARAM0 = P0;
-    save( fullfile( outputDir, 'results' ), 'imRlt', 'tRlt', 'dtRlt', 'pixdimAcq', 'imRltQ', 'pixdimRcn', 'PARAM0', 'PARAM', 'mask', 'maskQ', 'maskMoco', 'cineRMSD', 'imCine', 'imCineQ', 'tCine', 'TOL', '-v7.3' )
+    RESULTS = R;
+    save( fullfile( outputDir, 'results' ), 'imRlt', 'tRlt', 'dtRlt', 'pixdimAcq', 'imRltQ', 'pixdimRcn', 'PARAM0', 'PARAM', 'RESULTS', 'mask', 'maskQ', 'maskMoco', 'cineRMSD', 'imCine', 'imCineQ', 'tCine', 'TOL', '-v7.3' )
 
 else
     
@@ -1254,10 +1287,10 @@ if ( isVerbose ),
     % Probability Map
     
     hAx4 = subplot(1,4,4);
-    imshow(voxProb(indRow,indCol,indFrm)*frmProb(indFrm,1),[]),
+    imshow(voxProb(indRow,indCol,indFrm),[]),
     hold on, line(B{1}(:,2),B{1}(:,1),'LineWidth',2,'LineStyle',':','Color','y'), hold off
     hCb4 = colorbar('Location','SouthOutside');
-    hCb4.Label.String = '\itp\rm';
+    hCb4.Label.String = '\itp^{voxel}\rm';
     
     end
     
