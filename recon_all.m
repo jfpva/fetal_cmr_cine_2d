@@ -20,7 +20,7 @@ for iD = 1:numel(ind),
    isInc(ind(iD)) = ~strcmp(D(ind(iD)).name(1),'.');
    if isInc(iD) && ispc
        % check for hidden Windows directories - only works on Windows
-       [~,stats] = fileattrib(fullfile(resultsDir,D(iD).name));
+       [~,stats] = fileattrib(fullfile(dataDir,D(iD).name));
        if stats.hidden
           isInc(iD) = false;
        end
