@@ -70,9 +70,9 @@ switch fcmrNo,
     case  83,  % s26
         rawDataDirDateStr   = '2016_03_17';
         rawDataDirName      = 'DA_131112';
-    case  84,  % s28
-        rawDataDirDateStr   = '2015_12_21';
-        rawDataDirName      = 'KH_111036';
+    case  84,  % s25, s27
+        rawDataDirDateStr   = '2015_12_11';
+        rawDataDirName      = 'MA_108800';
     case  85,  % s26, s29
         rawDataDirDateStr   = '2015_12_14';
         rawDataDirName      = 'HA_109212';
@@ -82,9 +82,9 @@ switch fcmrNo,
     case  87,  % s26, s27
         rawDataDirDateStr   = '2015_12_18';
         rawDataDirName      = 'SP_111004';
-%     case  88,  
-%         rawDataDirDateStr   = '2015_12_00';
-%         rawDataDirName      = 'AA_00000';
+    case  88,  % 28
+        rawDataDirDateStr   = '2015_12_21';
+        rawDataDirName      = 'KH_111036';
     case  89,  % s33, s37
         rawDataDirDateStr   = '2016_04_07';
         rawDataDirName      = 'HO_700';
@@ -175,6 +175,15 @@ switch fcmrNo,
     case 124,  % s37-48
         rawDataDirDateStr   = '2016_10_20';
         rawDataDirName      = 'WH_131485'; 
+    case 126,  % s22-30
+        rawDataDirDateStr   = '2016_10_21';
+        rawDataDirName      = 'ST_133099'; 
+    case 127,  % s22-30, 32-41
+        rawDataDirDateStr   = '2016_10_28';
+        rawDataDirName      = 'MA_137139'; 
+    case 128,  % s22
+        rawDataDirDateStr   = '2016_06_17';
+        rawDataDirName      = 'ac_33965'; 
     otherwise
         error( 'Raw data directory undefined for fcmr%03i', fcmrNo )
 end
