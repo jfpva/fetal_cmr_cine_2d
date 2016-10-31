@@ -11,19 +11,22 @@ end
 
 D = dir( dataDir );
 
-isInc = cat(1,D.isdir);  % include all directories
+isInc = [ D.isdir ];  % include all directories
 
 % loop to identify hidden directories
 ind = find(isInc);
-for iD = 1:numel(ind), 
+for iD = ind, 
    % on OSX, hidden directories start with a dot
-   isInc(ind(iD)) = ~strcmp(D(ind(iD)).name(1),'.');
+   isInc(iD) = ~strcmp(D(iD).name(1),'.');
    if isInc(iD) && ispc
        % check for hidden Windows directories - only works on Windows
        [~,stats] = fileattrib(fullfile(dataDir,D(iD).name));
        if stats.hidden
           isInc(iD) = false;
        end
+   end
+   if isInc(iD),
+       isInc(iD) = strcmp( D(iD).name(1:4), 'fcmr' );
    end
 end
 
@@ -34,7 +37,7 @@ D = D(isInc);
 
 isFailed = false( 1, numel(D) );
 
-for iD = 1:numel(ind), 
+for iD = 1:numel(D), 
     
     fcmrNo   = 0;
     seriesNo = 0;
