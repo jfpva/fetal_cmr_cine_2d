@@ -892,9 +892,9 @@ for iIter = 1:nIter,
     
     R.meanDisp(iIter)       = mean( get_mask_values( abs(P(iIter).T.dispMap), mask ) );
     
-    R.pctVoxOutlier(iIter)  = 100 * sum( get_mask_values( P(iIter).P.vox, mask ) <= 0.5 ) / numel( P(iIter).P.vox );
+    R.pctVoxOutlier(iIter)  = 100 * sum( get_mask_values( P(iIter).P.vox, mask ) <= 0.5 ) / numel( get_mask_values( P(iIter).P.vox, mask ) );
     R.pctFrmOutlier(iIter)  = 100 * sum( P(iIter).P.frm <= 0.5 ) / numel( P(iIter).P.frm );
-    R.pctTotOutlier(iIter)  = 100 * sum( get_mask_values( bsxfun( @times, P(iIter).P.vox, reshape( P(iIter).P.frm, 1, 1, [] ) ), mask ) <= 0.5 ) / numel( P(iIter).P.vox );
+    R.pctTotOutlier(iIter)  = 100 * sum( get_mask_values( bsxfun( @times, P(iIter).P.vox, reshape( P(iIter).P.frm, 1, 1, [] ) ), mask ) <= 0.5 ) / numel( get_mask_values( P(iIter).P.vox, mask ) );
         
 end
 
