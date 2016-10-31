@@ -937,7 +937,7 @@ if ( isVerbose )
     plot( R.pctTotOutlier, '.-', 'Color', [1,0,1], 'LineWidth', 1.5, 'MarkerSize', 24 )
     hold off
     grid on
-    legend('p^{voxel}','p^{frame}','p','Location','best')
+    % legend('p^{voxel}','p^{frame}','p','Location','best')
    
        
     if ( isSaveResults ),
