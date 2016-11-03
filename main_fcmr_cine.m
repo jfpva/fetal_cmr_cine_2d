@@ -1,4 +1,4 @@
-function main_fcmr_cine( fcmrNo, seriesNo )
+function main_fcmr_cine( fcmrNo, seriesNo, safetyMargin, alpha  )
 %MAIN_FCMR_CINE
 %
 %   MAIN_FCMR_CINE( fcmrNo, seriesNo )
@@ -23,8 +23,13 @@ numFrame = 96;
 
 % k-t SENSE Recon Params 
 
-safetyMargin = 27;
-alpha = 100;
+if ~exist( 'safetyMargin', 'var' )
+    safetyMargin = 27;
+end
+
+if ~exist( 'alpha', 'var' )
+    alpha = 100;
+end
 
 
 %% Directories 
@@ -45,7 +50,11 @@ rltDir  = fullfile( resultsDir, strcat( rltDirName, filesep ) );
 
 % Cine Recon
 
-cineDir = fullfile( resultsDir, 'cine' );  % fullfile( resultsDir, sprintf( 'cine_%s', strcat(datestr(now,10),datestr(now,5),datestr(now,7)) ) );
+if safetyMargin == 27 && alpha == 100,
+  cineDir = fullfile( resultsDir, 'cine' );
+else
+  cineDir = fullfile( resultsDir, strcat( 'cine_', descStr ) );
+end
 
 
 %% Real-Time Recon
@@ -178,8 +187,9 @@ diary( 'off' );
 
 [ imCine, tCine ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'outputDir', cineDir, 'verbose', true );
 
-[ imCineNoMoco, tCineNoMoco ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'doMoco', false, 'outputDir', strcat( cineDir, '_noMoco' ), 'doConvergenceTest', true, 'verbose', true );
-[ imCineNoOutrej, tCineNoOutrej ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'doOutrej', false, 'outputDir', strcat( cineDir, '_noOutrej' ), 'doConvergenceTest', true, 'verbose', true );
-
+if safetyMargin == 27 && alpha == 100,
+  [ imCineNoMoco, tCineNoMoco ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'doMoco', false, 'outputDir', strcat( cineDir, '_noMoco' ), 'doConvergenceTest', true, 'verbose', true );
+  [ imCineNoOutrej, tCineNoOutrej ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'doOutrej', false, 'outputDir', strcat( cineDir, '_noOutrej' ), 'doConvergenceTest', true, 'verbose', true );
+end
 
 end  % main_fcmr_cine(...)
