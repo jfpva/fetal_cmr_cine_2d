@@ -1,6 +1,6 @@
 function [ indRow, indCol ] = get_im_crop_indices( mask, dR, dC )
 
-cropWinSize = 75; % mm
+cropWinSize = 100; % mm
 
 pt = bwmorph( mask, 'shrink', inf );
 [iR,iC] = find(pt);
