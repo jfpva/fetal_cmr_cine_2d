@@ -162,42 +162,53 @@ end
 xfMeanSig = smooth( xfMeanSig, nF/nDyn, 'moving' );  % remove ringing introdcued by zero-padding x-t space in time to upscale frequency resolution
 
 
-%% Identify Fundamental Frequency
+%% Identify Peaks in Frequency Spectrum
 
+
+% frequencies
 
 f = calc_freq( size(xfRoi,3), frameDuration );
 
-minPeakDistance   = find(f>minFreq,1,'first') - find(f==0,1,'first');
-indf0 = find(f<minFreq,1,'last'):find(f>maxFreq,1,'first');
-minPeakProminence = prctile(xfMeanSig(indf0),100)-prctile(xfMeanSig(indf0),90);
-                                            % WAS:  minPeakProminence = prctile(xfMeanSig(indf0),100)-prctile(xfMeanSig(indf0),67);
-                                            % WAS:  minPeakProminence = prctile(xfMeanSig,50);  
-                                            % NOTE: minPeakProminence = prctile(xfMeanSig,18); seems to work for HR estimation after rreg
-                                            
-[ ~, fPeak ] = findpeaks( xfMeanSig, 'MinPeakDistance', minPeakDistance, 'MinPeakProminence', minPeakProminence );
 
-heartFreqPeak  = f( fPeak );
+% find frequencies in range of fundamental (f0) 
+
+indf0pos = find(f<minFreq,1,'last'):find(f>maxFreq,1,'first');
+indf0neg = find(f<-maxFreq,1,'last'):find(f>-minFreq,1,'first');
+[ ~, iF0pos ] = findpeaks( xfMeanSig(indf0pos), 'NPeaks', 1, 'SortStr', 'descend' );
+[ ~, iF0neg ] = findpeaks( xfMeanSig(indf0neg), 'NPeaks', 1, 'SortStr', 'descend' );
+f0pos = abs( f(indf0pos(iF0pos)) );
+f0neg = abs( f(indf0neg(iF0neg)) );
+fPeak = [ indf0neg(iF0neg) indf0pos(iF0pos) ];
+
+
+% find frequencies in range ofand harmonic (f0)
+
+if ( ( max(f) > 2*maxFreq ) && ( useHarmonic ) ),
+    indf1pos = find(f<2*minFreq,1,'last'):find(f>2*maxFreq,1,'first');
+    indf1neg = find(f<-2*maxFreq,1,'last'):find(f>-2*minFreq,1,'first');
+    [ ~, iF1pos ] = findpeaks( xfMeanSig(indf1pos), 'NPeaks', 1, 'SortStr', 'descend' );
+    [ ~, iF1neg ] = findpeaks( xfMeanSig(indf1neg), 'NPeaks', 1, 'SortStr', 'descend' );
+    f1pos = abs( f(indf1pos(iF1pos)) / 2 );
+    f1neg = abs( f(indf1neg(iF1neg)) / 2 );
+    fPeak = [ indf1neg(iF1neg) fPeak indf1pos(iF1pos) ];
+end
 
 
 %% Identify Fundamental and Harmonic Frequencies
 
 
-fundamental  = abs( heartFreqPeak( ( abs(heartFreqPeak) > minFreq ) & ( abs(heartFreqPeak) < maxFreq ) ) );
+fundamental  = [ f0neg f0pos ];
 if isempty( fundamental ),
     error( '' )
 elseif length( fundamental ) == 1,
     fundamental = [ fundamental, NaN ];
-else
-    fundamental = sort( fundamental );
-    fundamental = fundamental(1:2);
 end
 
-harmonic1    = abs( heartFreqPeak( ( abs(heartFreqPeak) >= 2 * minFreq ) & ( abs(heartFreqPeak) < 2 * maxFreq ) ) / 2 );
-if length( harmonic1 ) < 2,
-    useHarmonic = false;
-else
-    harmonic1 = sort( harmonic1 );
-    harmonic1 = harmonic1( 1:2 );
+if ( useHarmonic )
+    harmonic1    = [ f1neg f1pos ];
+    if length( harmonic1 ) < 2,
+        useHarmonic = false;
+    end
 end
 
 
