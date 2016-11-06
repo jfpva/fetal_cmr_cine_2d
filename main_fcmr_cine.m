@@ -192,4 +192,10 @@ if safetyMargin == 27 && alpha == 100,
   [ imCineNoOutrej, tCineNoOutrej ] = rlt2cine_linear( xtRlt, dtRlt, 'mask', mask, 'pixdimAcq', pixdimAcq, 'isSaveResults', true, 'doOutrej', false, 'outputDir', strcat( cineDir, '_noOutrej' ), 'doConvergenceTest', true, 'verbose', true );
 end
 
+
+%% create animated gifs
+
+make_animated_gifs( srcDir, resultsDir );
+
+
 end  % main_fcmr_cine(...)
