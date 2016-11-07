@@ -46,7 +46,7 @@ p = inputParser;
 default.roi             = [];
 default.useHarmonic     = true;
 default.useUpsampleFreq = true;
-default.hrRange         = [110 170];  % bpm
+default.hrRange         = [120 160];  % bpm
 default.isVerbose       = false;
 
 addRequired(  p, 'imSeq', ...
