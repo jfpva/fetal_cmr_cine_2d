@@ -29,7 +29,7 @@ fprintf( '![](rlt_sm027a100f096/figs/rlt_full.gif) ![](rlt_sm027a100f096/figs/rl
 fprintf( '## Cine \n\n' )
 fprintf( '### $X$\n\n' )
 fprintf( 'L-R: $X$, $X^{(T)}$, $X^{(T)}$ reordered based on $\\theta$  \n' )
-fprintf( '![](rlt_sm27a100f096/figs/rlt_crop.gif) \n' )
+fprintf( '![](rlt_sm027a100f096/figs/rlt_crop.gif) \n' )
 fprintf( '![](cine/figs/rltt_crop.gif) \n' )
 fprintf( '![](cine/figs/rdr_crop.gif)  \n\n' )
 fprintf( '### $Y^{[1]}$\n\n' )
@@ -52,8 +52,6 @@ N = dir( fullfile( dataDir, '*_xtslw.mat' ) );
 load( fullfile( dataDir, N(1).name ), 'xtSlw' );
 
 load( fullfile( resultsDir, 'cine', 'results.mat' ), 'tRlt', 'imRltQ', 'PARAM', 'maskQ', 'pixdimAcq', 'pixdimRcn', 'RESULTS' );
-SnoOutrej   = load( fullfile( resultsDir, 'cine_noOutrej', 'results.mat' ), 'PARAM', 'RESULTS' );
-SnoMoco     = load( fullfile( resultsDir, 'cine_noMoco', 'results.mat' ), 'PARAM', 'RESULTS' );
 
 xtqDim = size( imRltQ );
 [~,indRlt2Crd] = sort( PARAM(end).R.tRr );
@@ -69,8 +67,6 @@ imCine      = PARAM(end).P.imCine;
 imCine1a    = PARAM(1).R.imCine;
 imCine1b    = PARAM(1).T.imCine;
 imCine1c    = PARAM(1).P.imCine;
-imCineAB    = SnoOutrej.PARAM(end).P.imCine;
-imCineAC    = SnoMoco.PARAM(end).P.imCine;
 
 % crop window indices
 [ indRow, indCol ] = get_im_crop_indices( maskQ, pixdimRcn(1), pixdimRcn(1) );
@@ -122,13 +118,24 @@ gifFilePath = ims2gif( abs(imCine1b(indRow,indCol,:)), 'filedir', fullfile( 'cin
 gifFilePath = ims2gif( abs(imCine1c(indRow,indCol,:)), 'filedir', fullfile( 'cine', 'figs' ), 'filename', 'cine1c_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
     % fprintf( '![](%s)  \n', gifFilePath ) 
 
-% cine cardsync+moco (final)
-gifFilePath = ims2gif( abs(imCineAB(indRow,indCol,:)), 'filedir', fullfile( 'cine_noOutrej', 'figs' ), 'filename', 'cineAB_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
-    % fprintf( '![](%s)  \n', gifFilePath ) 
 
-% cine cardsync+outrej (final)
-gifFilePath = ims2gif( abs(imCineAC(indRow,indCol,:)), 'filedir', fullfile( 'cine_noMoco', 'figs' ), 'filename', 'cineAC_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
-    % fprintf( '![](%s)  \n', gifFilePath ) 
+%% cine cardsync+moco / cine cardsync+outrej
 
-    
+try
+    % cine cardsync+moco (final)
+    SnoOutrej   = load( fullfile( resultsDir, 'cine_noOutrej', 'results.mat' ), 'PARAM', 'RESULTS' );
+    imCineAB    = SnoOutrej.PARAM(end).P.imCine;   
+    gifFilePath = ims2gif( abs(imCineAB(indRow,indCol,:)), 'filedir', fullfile( 'cine_noOutrej', 'figs' ), 'filename', 'cineAB_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
+catch
+end
+
+try
+    % cine cardsync+outrej (final)
+    SnoMoco     = load( fullfile( resultsDir, 'cine_noMoco', 'results.mat' ), 'PARAM', 'RESULTS' );
+    imCineAC    = SnoMoco.PARAM(end).P.imCine;
+    gifFilePath = ims2gif( abs(imCineAC(indRow,indCol,:)), 'filedir', fullfile( 'cine_noMoco', 'figs' ), 'filename', 'cineAC_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
+catch
+end
+
+
 end   % make_animated_gifs(...)
