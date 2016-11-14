@@ -41,16 +41,21 @@ fprintf( '### $Y^{[m]}$\n\n' )
 fprintf( 'L-R: cardsync+moco, cardsync+outrej, full pipeline   \n' )
 fprintf( '![](cine_noOutrej/figs/cineAB_crop.gif) \n' )
 fprintf( '![](cine_noMoco/figs/cineAC_crop.gif) \n' )
-fprintf( '![](cine/figs/cine_crop.gif)  \n' )
-fprintf( '### _k-t_ SENSE Reconstruction (uniform regularisation)\n\n' )
-fprintf( '![](rlt_sm027a001f096/figs/rlt_full.gif) ![](rlt_sm027a001f096/figs/rlt_crop.gif)  \n\n' )
+fprintf( '![](cine/figs/cine_crop.gif)  \n\n' )
 fprintf( '## Uniform _k-t_ SENSE Regularisation  \n\n' )
-fprintf( 'L-R: $X^{(T)}$, $X^{(T)}$ reordered based on $\\theta$  \n' )
-fprintf( '![](rlt_sm027a001f096/figs/rltt_crop.gif) \n' )
-fprintf( '![](rlt_sm027a001f096/figs/rdr_crop.gif)  \n\n' )
+fprintf( 'Top (uniform $\\lambda$) vs. Bottom (spatially-varying $\\lambda$)  \n' )
 fprintf( 'L-R: $X$, $Y$  \n' )
+fprintf( '![](rlt_sm027a001f096/figs/rlt_crop.gif) \n' )
+fprintf( '![](cine_rlt_sm027a001f096/figs/cine_crop.gif)  \n' )  
 fprintf( '![](rlt_sm027a100f096/figs/rlt_crop.gif) \n' )
-fprintf( '![](cine/figs/cine1c_crop.gif)  \n\n' )
+fprintf( '![](cine/figs/cine_crop.gif)  \n\n' )
+fprintf( '<!-- ![](rlt_sm027a001f096/figs/rlt_full.gif) ![](rlt_sm027a001f096/figs/rlt_crop.gif)  -->\n\n' )
+fprintf( '<!-- L-R: $X^{(T)}$, $X^{(T)}$ reordered based on $\\theta$  -->\n' )
+fprintf( '<!-- ![](rlt_sm027a001f096/figs/rltt_crop.gif) -->\n' )
+fprintf( '<!-- ![](rlt_sm027a001f096/figs/rdr_crop.gif)  -->\n\n' )
+fprintf( '<!-- L-R: $X$, $Y$  -->\n' )
+fprintf( '<!-- ![](rlt_sm027a001f096/figs/rlt_crop.gif) -->\n' )
+fprintf( '<!-- ![](cine_rlt_sm027a001f096/figs/cine1c_crop.gif)  -->\n\n' )
 
 
 %% Make Gifs
@@ -165,10 +170,10 @@ try
     ims2gif( abs(imRltNoMask(indRow,indCol,:)), 'filedir', fullfile( 'rlt_sm027a001f096', 'figs' ), 'filename', 'rlt_crop', 't', dtRlt, 'imlimits', imLimit, 'spatialScaling', 2 );
     
     % transformed
-    ims2gif( abs(imRltNoMaskT(indRow,indCol,:)), 'filedir', fullfile( 'cine_rlt_sm027a001f096', 'figs' ), 'filename', 'rltt_crop', 't', dtRlt, 'imlimits', imLimit, 'spatialScaling', 2 );
+    ims2gif( abs(imRltNoMaskT(indRow,indCol,:)), 'filedir', fullfile( 'rlt_sm027a001f096', 'figs' ), 'filename', 'rltt_crop', 't', dtRlt, 'imlimits', imLimit, 'spatialScaling', 2 );
     
     % reordered
-    ims2gif( abs(imRdrNoMask(indRow,indCol,:)), 'filedir', fullfile( 'cine_rlt_sm027a001f096', 'figs' ), 'filename', 'rdr_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
+    ims2gif( abs(imRdrNoMask(indRow,indCol,:)), 'filedir', fullfile( 'rlt_sm027a001f096', 'figs' ), 'filename', 'rdr_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
     
     % cine (final)
     ims2gif( abs(imCineNoMask(indRow,indCol,:)), 'filedir', fullfile( 'cine_rlt_sm027a001f096', 'figs' ), 'filename', 'cine_crop', 't', dtLimit, 'imlimits', imLimit, 'spatialScaling', 2 );
