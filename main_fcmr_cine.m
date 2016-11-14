@@ -53,7 +53,7 @@ rltDir  = fullfile( resultsDir, strcat( rltDirName, filesep ) );
 if safetyMargin == 27 && alpha == 100,
   cineDir = fullfile( resultsDir, 'cine' );
 else
-  cineDir = fullfile( resultsDir, strcat( 'cine_', descStr ) );
+  cineDir = fullfile( resultsDir, strcat( 'cine_rlt_', descStr ) );
 end
 
 

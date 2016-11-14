@@ -16,7 +16,7 @@ diaryFile = fullfile( resultsDir, 'summary.md');
 if ( exist( diaryFile, 'file' ) )
     delete( diaryFile );
 end
-diary( fullfile( resultsDir, 'summary.md') );
+diary( diaryFile );
 closeDiary = onCleanup( @() diary( 'off' ) );
 
 fprintf( '## Real-Time\n\n' );
