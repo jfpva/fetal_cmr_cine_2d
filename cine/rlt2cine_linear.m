@@ -554,7 +554,7 @@ else
 
     % Recon Cine, Measure Entropy
 
-    % [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRlt, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMoco, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimAcqRltNii, fov, '' );
+    [ P(iIter).R.imCine, P(iIter).R.tCine ] = recon_cine( imRltQ, dtRlt, P(iIter).R.tRr, P(iIter).R.rrInterval, P(iIter).T.tform, maskMocoQ, P(iIter).P.vox, P(iIter).P.frm, nFrameCine, pixdimRcnRltNii, fov, '' );
     % E(iIter).R.time  = imagemetric( P(iIter).R.imCine(row,col,:), {'PC'} );
     % E(iIter).R.image = imagemetric( P(iIter).R.imCine(row,col,:), {'Cine'} );
     
