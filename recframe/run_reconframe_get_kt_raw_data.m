@@ -181,6 +181,15 @@ switch fcmrNo,
     case 127,  % s22-30, 32-41
         rawDataDirDateStr   = '2016_10_28';
         rawDataDirName      = 'MA_137139'; 
+    case 130,  % s21-30, 33-40
+        rawDataDirDateStr   = '2016_11_04';
+        rawDataDirName      = 'FI_141988'; 
+    case 131,  % s19-28, 30-38
+        rawDataDirDateStr   = '2016_11_07';
+        rawDataDirName      = 'PI_142913'; 
+%     case 000,  % s00
+%         rawDataDirDateStr   = '0000_00_00';
+%         rawDataDirName      = 'AA_000000'; 
     otherwise
         error( 'Raw data directory undefined for fcmr%03i', fcmrNo )
 end
