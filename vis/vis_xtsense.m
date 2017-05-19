@@ -12,10 +12,11 @@ dimT = 3;  nT = size( xfDff, dimT );
 dimF = dimT; nF = nT;
 dimC = 4;  nC = size( xfDff, dimC );
 
-%% Pt
+%% Find Centroid of of Mask and Coil for Visualisation
 
-pt = bwmorph( mask, 'shrink', inf );
-[iX,iY] = find(pt);
+S = regionprops( mask, 'centroid' );
+iX = round( S.Centroid(2) );
+iY = round( S.Centroid(1) );
 [~,iC]=max(abs(squeeze(csm(iX,iY,:))));
 
 
