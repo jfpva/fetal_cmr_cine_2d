@@ -2,8 +2,9 @@ function [ indRow, indCol ] = get_im_crop_indices( mask, dR, dC )
 
 cropWinSize = 100; % mm
 
-pt = bwmorph( mask, 'shrink', inf );
-[iR,iC] = find(pt);
+S = regionprops( mask, 'centroid' );
+iR = round( S.Centroid(2) );
+iC = round( S.Centroid(1) );
 
 rowEndPts = iR + ( cropWinSize / dR ) / 2 * [ -1, +1 ];
 if rowEndPts(1) < 0, 
